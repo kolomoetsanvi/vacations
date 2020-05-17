@@ -112,7 +112,7 @@ $js = <<<JS
                }
              })
             }//if
-           
+          
 
         });
 
@@ -121,15 +121,15 @@ $js = <<<JS
 //////////////////////////////////////////////////////////////////////////////
 
         function setDate(res){
-            $('#insertDate').html(res);    
+            $('#vacationform-start_d').val('');
+            $('#vacationform-end_d').val('');
+            $('#insertDate').html(res);
         }
-  
+ 
         $('#addDateForm').on('beforeSubmit  ', function (e) {
             e.preventDefault();
             var data=$(this).serialize();
-            // $('#vacationform-start_d').datepicker("setDate", '29.01.2020');
-            // $('#vacationform-end_d').value('');
-            
+     
             $.ajax({
                 type: "POST",
                 url: '/vacations/add-date',
@@ -138,20 +138,20 @@ $js = <<<JS
                            if(!res) alert('Ошибка!');
                            setDate(res); 
                        },
-                       error: function () {
-                           alert('Ошибка');
+                       error: function (res) {
+                           alert('Ошибка!');
                        }
             });
             return false;
         });
-        
+       
  //Запуск модального окна для редактирование дат сортудником
 //////////////////////////////////////////////////////////////////////////////       
          function showEditForm(res){
-            $('#modalW .modal-body').html(res);    
+            $('#modalW .modal-body').html(res);
             $('#modalW').modal('show');    
         }
-        
+       
         $('#insertDate').on('click', '.edit-date-a', function(e){
             e.preventDefault();
             var id = $(this).data('id');
@@ -168,41 +168,41 @@ $js = <<<JS
                        }
             });
         })
-        
-        
- //Сохранение новых датотпуска сортудником
+       
+       
+ //Сохранение новых дат отпуска сортудником
 //////////////////////////////////////////////////////////////////////////////       
      function saveEdit(res){
             $('#insertDate').html(res); 
              $('#modalW').modal('hide');
-   
-        }
-        
+     }
+       
          $('#btnSave').on('click', function(e){
             e.preventDefault();
             var id = $('#idVac').data('id');
-            var start_date =$('#start_date').val();
-            var end_date =$('#end_date').val();
+            var start_date = $('#start_date').val();
+            var end_date = $('#end_date').val();
              $.ajax({
                 type: "POST",
                 url: '/vacations/save-edit-date',
                 data: {'id': id, 'start_date': start_date, 'end_date': end_date},
                 success: function (res) {
-                           if(!res) alert('Ошибка!');
-                          saveEdit(res); 
+                           if(!res)alert('Ошибка!');
+                           saveEdit(res);
+                          
                        },
                        error: function () {
                            alert('Ошибка');
                        }
             });
         })       
-        
+       
 JS;
 
 $this->registerJs($js);
 ?>
 
-<?php //$this->registerJsFile('@web/js/scripts.js', ['depends' => 'yii\web\YiiAsset'])?>
+<?php $this->registerJsFile('@web/js/scripts.js', ['depends' => 'yii\web\YiiAsset'])?>
 
 <?php $this->endPage() ?>
 

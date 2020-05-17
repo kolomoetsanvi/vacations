@@ -25,14 +25,21 @@ class VacationForm extends Model
             // start_d, end_d атрибуты обязательны
             [['start_d', 'end_d'], 'required'],
             //собственный валидатор
-            ['end_d', 'validateEnd'],
+            [ 'end_d', 'validateEnd'],
 
         ];
     }
 
+//    public function validateEnd($attribute)
+//    {
+//        if(strtotime($attribute->end_d) < strtotime($attribute->start_d)){
+//            $this->addError($attribute, 'Дата окончания не может быть раньше даты начала отпуска');
+//        }
+//    }
+
     public function validateEnd($attribute)
     {
-        if(strtotime($attribute->end_d) < strtotime($attribute->start_d)){
+        if(strtotime($this->end_d) < strtotime($this->start_d)){
             $this->addError($attribute, 'Дата окончания не может быть раньше даты начала отпуска');
         }
     }

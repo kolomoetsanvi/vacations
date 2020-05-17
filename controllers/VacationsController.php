@@ -75,12 +75,18 @@ class VacationsController extends AppController
         $vac = new Vacation();
         if(Yii::$app->request->isAjax){
            if($form->load(Yii::$app->request->post())){
-              if($form->validate()){
+              if($form->validate()) {
                   $vac->user_id = $userId;
                   $vac->update_user_id = $userId;
                   $vac->start_date = $form->start_d;
                   $vac->end_date = $form->end_d;
                   $vac->save();
+              }else{
+//                  debug($form);
+                  foreach ($form->errors as $id => $item){
+//                      debug($form);
+                      Yii::$app->session->setFlash('errValid', $item[0]);
+                  }
               }
 
              $userVacations = Vacation::find()->where(['user_id' => $userId])->all();
@@ -107,19 +113,20 @@ class VacationsController extends AppController
             $startDate = Yii::$app->request->post('start_date');
             $endDate = Yii::$app->request->post('end_date');
 
-            $vac = Vacation::findOne(['id' => $id]);
-            $vac->update_user_id = $id;
-            $vac->start_date = $startDate;
-            $vac->end_date = $endDate;
-            $vac->save();
+            $form = new VacationForm();
+            $form->start_d = $startDate;
+            $form->end_d = $endDate;
 
-            $userId = Yii::$app->user->identity->getId();
-            $userVacations = Vacation::find()->where(['user_Id' => $userId])->all();
-            return $this->renderPartial('vacTab', compact(['userVacations']));
+               $vac = Vacation::findOne(['id' => $id]);
+                $vac->update_user_id = $id;
+                $vac->start_date = $startDate;
+                $vac->end_date = $endDate;
+                $vac->save();
+
+                $userId = Yii::$app->user->identity->getId();
+                $userVacations = Vacation::find()->where(['user_Id' => $userId])->all();
+                return $this->renderPartial('vacTab', compact(['userVacations']));
         }
-
-
-//
 
     }
 
