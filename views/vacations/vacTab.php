@@ -4,7 +4,14 @@ use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 ?>
 
-
+<?php if(Yii::$app->session->hasFlash('errValid')):?>
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <strong> <?php echo Yii::$app->session->getFlash('errValid')?></strong>
+    </div>
+<?php endif?>
 
 
     <table class="table table-striped table-bordered table-hover" id="confirmedVacTable">
@@ -39,11 +46,3 @@ use yii\helpers\Html;
 
 
 
-<?php if(Yii::$app->session->hasFlash('errValid')):?>
-    <div class="alert alert-danger alert-dismissible" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-        <strong> <?php echo Yii::$app->session->getFlash('errValid')?></strong>
-    </div>
-<?php endif?>

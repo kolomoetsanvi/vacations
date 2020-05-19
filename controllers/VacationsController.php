@@ -82,9 +82,7 @@ class VacationsController extends AppController
                   $vac->end_date = $form->end_d;
                   $vac->save();
               }else{
-//                  debug($form);
-                  foreach ($form->errors as $id => $item){
-//                      debug($form);
+                   foreach ($form->errors as $id => $item){
                       Yii::$app->session->setFlash('errValid', $item[0]);
                   }
               }
@@ -117,17 +115,28 @@ class VacationsController extends AppController
             $form->start_d = $startDate;
             $form->end_d = $endDate;
 
-               $vac = Vacation::findOne(['id' => $id]);
+
+
+            if($form->validate()) {
+                $vac = Vacation::findOne(['id' => $id]);
                 $vac->update_user_id = $id;
                 $vac->start_date = $startDate;
                 $vac->end_date = $endDate;
                 $vac->save();
+            }else{
+                foreach ($form->errors as $id => $item){
+                    Yii::$app->session->setFlash('errValid', $item[0]);
+                }
+            }
 
                 $userId = Yii::$app->user->identity->getId();
                 $userVacations = Vacation::find()->where(['user_Id' => $userId])->all();
-                return $this->renderPartial('vacTab', compact(['userVacations']));
-        }
 
+                return $this->renderPartial('vacTab', compact(['userVacations']));
+
+
+
+        }
     }
 
 

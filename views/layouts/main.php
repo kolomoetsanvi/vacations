@@ -176,7 +176,8 @@ $js = <<<JS
             $('#insertDate').html(res); 
              $('#modalW').modal('hide');
      }
-       
+ 
+     
          $('#btnSave').on('click', function(e){
             e.preventDefault();
             var id = $('#idVac').data('id');
@@ -187,9 +188,12 @@ $js = <<<JS
                 url: '/vacations/save-edit-date',
                 data: {'id': id, 'start_date': start_date, 'end_date': end_date},
                 success: function (res) {
-                           if(!res)alert('Ошибка!');
-                           saveEdit(res);
-                          
+                           if(!res){
+                             alert('Ошибка1!');  
+                          }
+                          saveEdit(res); 
+
+                           
                        },
                        error: function () {
                            alert('Ошибка');
