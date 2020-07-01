@@ -4,6 +4,10 @@
 $this->title = 'Статистика';
 ?>
 
+<?php
+    $months = array('1' => 'Январь', 'Февраль' , 'Март', 'Апрель', 'Май', 'Июнь',
+                           'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь')
+?>
 
 <div class="container">
 
@@ -16,10 +20,16 @@ $this->title = 'Статистика';
         </tr>
         </thead>
         <tbody >
-                <tr>
-                    <td class="text-center">Январь</td>
-                    <td class="text-center">0</td>
-                    <td class="text-center">0</td>
+
+             <?php if(!empty($result)):?>
+                 <?php foreach ($result as $key => $item):?>
+                    <tr>
+                        <td class="text-center"><?=$months[$key] ?></td>
+                        <td class="text-center"><?=$item['vacationDays'] ?></td>
+                        <td class="text-center"><?=$item['workerDays'] ?></td>
+                    </tr>
+                 <?php endforeach?>
+             <?php endif;?>
         </tbody>
     </table>
 
