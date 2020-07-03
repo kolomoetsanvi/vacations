@@ -43,6 +43,7 @@ AppAsset::register($this);
                 ['label' => 'Вход', 'url' => ['/site/login']]
             ) : (
                 '<li><a href="/statistics/index">Статистика</a></li>'
+                .'<li><a href="/statistics/query">Статистика SQL запрос</a></li>'
                 .'<li>'
                 . Html::beginForm(['/site/logout'], 'post')
                 . Html::submitButton(

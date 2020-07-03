@@ -130,6 +130,54 @@ class StatisticsController extends AppController
         return $this->render('information' , compact(['result']));
     }// public function actionIndex()
 
+    //////////////////////////////////////////////////////////////////////////
+    //######################################################################//
+    //////////////////////////////////////////////////////////////////////////
+    public function actionQuery()
+    {
+        $result = Yii::$app->db->createCommand(
+           'SELECT 
+                MONTH(start_date) as Month,
+               SUM( CASE
+                -- кол-во дней отпуска если отпуск внутри одного месяца
+                    WHEN MONTH(start_date) = MONTH(end_date) 
+                        THEN (DAYOFMONTH(end_date) - DAYOFMONTH(start_date) + 1)
+                -- количество дней отпуска от начала до конца текущего месяца    
+                   WHEN MONTH(start_date) != MONTH(end_date) 
+                        THEN (DAYOFMONTH(LAST_DAY(start_date)) - DAYOFMONTH(start_date) + 1)
+                  
+                   ELSE 0
+                END) AS SumDay
+           FROM vacations
+           WHERE confirmation = 1
+           GROUP BY Month
+ 
+           
+           UNION 
+           SELECT 
+                MONTH(end_date) as Month,
+                SUM(DAYOFMONTH(end_date)) AS SumDay
+           FROM vacations
+           WHERE confirmation = 1 AND MONTH(start_date) != MONTH(end_date)
+           GROUP BY Month
+           
+           
+           UNION 
+           SELECT 
+                MONTH(start_date)+1 as Month,
+               SUM( DAYOFMONTH(LAST_DAY(DATE_ADD(LAST_DAY(start_date), INTERVAL 1 DAY))) ) AS SumDay
+           FROM vacations
+           WHERE confirmation = 1 AND  MONTH(end_date) > MONTH(start_date)+1
+           GROUP BY Month
+           ORDER BY Month
+           
+           '
+        )->queryAll();
+
+        debug($result);
+        return $this->render('informationQuery' , compact(['result']));
+
+    }
 
 
 }
