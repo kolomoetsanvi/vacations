@@ -24,7 +24,7 @@ $months = array('1' => 'Январь', 'Февраль' , 'Март', 'Апре�
         <?php if(!empty($result)):?>
             <?php foreach ($result as $key => $item):?>
                 <tr>
-                    <td class="text-center"><?=$months[$key] ?></td>
+                    <td class="text-center"><?=$months[$item['Month']] ?></td>
                     <td class="text-center"><?=$item['vacationDays'] ?></td>
                     <td class="text-center"><?=$item['workerDays'] ?></td>
                 </tr>

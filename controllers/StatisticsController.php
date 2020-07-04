@@ -138,6 +138,7 @@ class StatisticsController extends AppController
         $result = Yii::$app->db->createCommand(
            'SELECT 
                 MONTH(start_date) as Month,
+               
                SUM( CASE
                 -- кол-во дней отпуска если отпуск внутри одного месяца
                     WHEN MONTH(start_date) = MONTH(end_date) 
@@ -145,9 +146,28 @@ class StatisticsController extends AppController
                 -- количество дней отпуска от начала до конца текущего месяца    
                    WHEN MONTH(start_date) != MONTH(end_date) 
                         THEN (DAYOFMONTH(LAST_DAY(start_date)) - DAYOFMONTH(start_date) + 1)
-                  
                    ELSE 0
-                END) AS SumDay
+                END) AS vacationDays,
+                
+                SUM( CASE
+                -- кол-во рабочих дней отпуска если отпуск внутри одного месяца
+                    WHEN MONTH(start_date) = MONTH(end_date) 
+                        THEN ( (CEILING((DAYOFMONTH(end_date) - DAYOFMONTH(start_date)+1) / 7)-1)*5
+                         + MOD((DAYOFMONTH(end_date) - DAYOFMONTH(start_date)+1), 7)
+                         - if((DAYOFWEEK(start_date) = 1 ), 1, 0)
+                         - if((DAYOFWEEK(start_date) <= DAYOFWEEK(end_date)) AND (DAYOFWEEK(end_date) = 7), 1, 0)
+                        - if((DAYOFWEEK(start_date) > DAYOFWEEK(end_date) ), 2, 0)                                                  
+                        )
+                -- количество рабочих дней отпуска от начала до конца текущего месяца    
+                   WHEN MONTH(start_date) != MONTH(end_date) 
+                        THEN  ( (CEILING((DAYOFMONTH(LAST_DAY(start_date)) - DAYOFMONTH(start_date)+1) / 7)-1)*5
+                         + MOD((DAYOFMONTH(LAST_DAY(start_date)) - DAYOFMONTH(start_date)+1), 7)
+                         - if((DAYOFWEEK(start_date) = 1 ), 1, 0)
+                         - if((DAYOFWEEK(start_date) <= DAYOFWEEK(LAST_DAY(start_date))) AND (DAYOFWEEK(LAST_DAY(start_date)) = 7), 1, 0)
+                         - if((DAYOFWEEK(start_date) > DAYOFWEEK(LAST_DAY(start_date)) ), 2, 0)                                                  
+                        )
+                   ELSE 0
+                END) AS workerDays
            FROM vacations
            WHERE confirmation = 1
            GROUP BY Month
@@ -156,7 +176,14 @@ class StatisticsController extends AppController
            UNION 
            SELECT 
                 MONTH(end_date) as Month,
-                SUM(DAYOFMONTH(end_date)) AS SumDay
+                SUM(DAYOFMONTH(end_date)) AS vacationDays,
+                SUM( 
+                    (CEILING(DAYOFMONTH(end_date) / 7)-1)*5
+                        + MOD((DAYOFMONTH(end_date)), 7)
+                         - if((DAYOFWEEK(DATE_SUB(end_date, INTERVAL (DAYOFMONTH(end_date)-1) DAY)) = 1 ), 1, 0)
+                          - if((DAYOFWEEK(DATE_SUB(end_date, INTERVAL (DAYOFMONTH(end_date)-1) DAY)) <= DAYOFWEEK(end_date)) AND (DAYOFWEEK(end_date) = 7), 1, 0)
+                       - if((DAYOFWEEK(DATE_SUB(end_date, INTERVAL (DAYOFMONTH(end_date)-1) DAY)) > DAYOFWEEK(end_date) ), 2, 0)                                                  
+                 ) AS workerDays
            FROM vacations
            WHERE confirmation = 1 AND MONTH(start_date) != MONTH(end_date)
            GROUP BY Month
@@ -165,7 +192,14 @@ class StatisticsController extends AppController
            UNION 
            SELECT 
                 MONTH(start_date)+1 as Month,
-               SUM( DAYOFMONTH(LAST_DAY(DATE_ADD(LAST_DAY(start_date), INTERVAL 1 DAY))) ) AS SumDay
+               SUM( DAYOFMONTH(LAST_DAY(DATE_ADD(LAST_DAY(start_date), INTERVAL 1 DAY))) ) AS vacationDays,
+               SUM( 
+                    (CEILING(DAYOFMONTH(LAST_DAY(DATE_ADD(LAST_DAY(start_date), INTERVAL 1 DAY))) / 7)-1)*5
+                        + MOD((DAYOFMONTH(LAST_DAY(DATE_ADD(LAST_DAY(start_date), INTERVAL 1 DAY)))), 7)
+                         - if((DAYOFWEEK(DATE_SUB((LAST_DAY(DATE_ADD(LAST_DAY(start_date), INTERVAL 1 DAY))), INTERVAL (DAYOFMONTH((LAST_DAY(DATE_ADD(LAST_DAY(start_date), INTERVAL 1 DAY))))-1) DAY)) = 1 ), 1, 0)
+                          - if((DAYOFWEEK(DATE_SUB((LAST_DAY(DATE_ADD(LAST_DAY(start_date), INTERVAL 1 DAY))), INTERVAL (DAYOFMONTH((LAST_DAY(DATE_ADD(LAST_DAY(start_date), INTERVAL 1 DAY))))-1) DAY)) <= DAYOFWEEK((LAST_DAY(DATE_ADD(LAST_DAY(start_date), INTERVAL 1 DAY))))) AND (DAYOFWEEK((LAST_DAY(DATE_ADD(LAST_DAY(start_date), INTERVAL 1 DAY)))) = 7), 1, 0)
+                       - if((DAYOFWEEK(DATE_SUB((LAST_DAY(DATE_ADD(LAST_DAY(start_date), INTERVAL 1 DAY))), INTERVAL (DAYOFMONTH((LAST_DAY(DATE_ADD(LAST_DAY(start_date), INTERVAL 1 DAY))))-1) DAY)) > DAYOFWEEK((LAST_DAY(DATE_ADD(LAST_DAY(start_date), INTERVAL 1 DAY)))) ), 2, 0)                                                  
+                 ) AS workerDays
            FROM vacations
            WHERE confirmation = 1 AND  MONTH(end_date) > MONTH(start_date)+1
            GROUP BY Month
@@ -174,7 +208,7 @@ class StatisticsController extends AppController
            '
         )->queryAll();
 
-        debug($result);
+
         return $this->render('informationQuery' , compact(['result']));
 
     }
