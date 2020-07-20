@@ -52,7 +52,7 @@ create table if not exists vacations(
  use vacations_db;
 
 insert into roles values
-	(null, 'director'),
+	(null, 'board'),
 	(null, 'worker')
     ;
 
